@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "project2-polyakov-oleg-m25-555"
+version = "0.1.0"
+description = "Simple Database"
+authors = [
+    "Polyakovoa <polyakovoa@mail.ru>"
+]
+readme = "README.md"
+packages = [
+    { include = "primitive_db", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.12"
+
+[tool.poetry.scripts]
+project = "primitive_db.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
