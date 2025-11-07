@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "project2-polyakov-oleg-m25-555"
-version = "0.1.1"
+version = "0.2.0"
 description = "Simple Database"
 authors = [
     "Polyakovoa <polyakovoa@mail.ru>"

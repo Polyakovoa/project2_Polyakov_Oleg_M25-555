@@ -10,3 +10,4 @@ __pycache__/
 env/
 venv/
 ruff_cache/
+db_meta.json
