@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "project2-polyakov-oleg-m25-555"
-version = "0.1.0"
+version = "0.1.1"
 description = "Simple Database"
 authors = [
     "Polyakovoa <polyakovoa@mail.ru>"
@@ -12,6 +12,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.12"
+prompt = "^0.4.1"
 
 [tool.poetry.scripts]
 project = "primitive_db.main:main"
@@ -19,3 +20,16 @@ project = "primitive_db.main:main"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+exclude = ["venv", ".venv", "dist", "__pycache__"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = []
+
+[dependency-groups]
+dev = [
+    "ruff (>=0.14.4,<0.15.0)"
+]

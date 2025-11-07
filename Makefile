@@ -12,3 +12,6 @@ publish:
 
 package-install:
 	python -m pip install dist/*.whl
+
+lint:
+	poetry run ruff check .
