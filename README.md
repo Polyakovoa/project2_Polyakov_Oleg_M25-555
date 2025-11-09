@@ -73,9 +73,9 @@ bool - логические значения
 
 Демо2. Полный функционал по созданию и работе с базами данных: https://asciinema.org/a/r0GFZtVAuTqgTnq1c6SBg704m
 
-Демо3. Полный функционал с декораторами и замыканиями: 
+Демо3. Полный функционал с декораторами и замыканиями: https://asciinema.org/a/j7PW3INVijHEz9HlayVkKtq3H
 
-Демо2 в текстовом формате:
+# Демо2 в текстовом формате:
 
 admin@Ubuntu:~/project2_Polyakov_Oleg_M25-555$ project
 ***Операции с данными***
@@ -167,6 +167,136 @@ admin@Ubuntu:~/project2_Polyakov_Oleg_M25-555$ project
 Таблица: products
 Столбцы: ID:int, title:str, price:int, in_stock:bool
 Количество записей: 2
+
+>>> Введите команду: exit
+Выход из программы.
+admin@Ubuntu:~/project2_Polyakov_Oleg_M25-555$
+exit
+
+
+# Демо3 в текстовом формате
+
+admin@Ubuntu:~/project2_Polyakov_Oleg_M25-555$ project
+***Операции с данными***
+
+Функции:
+<command> create_table <имя_таблицы> <столбец1:тип> <столбец2:тип> .. - создать таблицу
+<command> list_tables - показать список всех таблиц
+<command> drop_table <имя_таблицы> - удалить таблицу
+<command> insert into <имя_таблицы> values (<значение1>, <значение2>, ...) - создать запись.
+<command> select from <имя_таблицы> where <столбец> = <значение> - прочитать записи по условию.
+<command> select from <имя_таблицы> - прочитать все записи.
+<command> update <имя_таблицы> set <столбец1> = <новое_значение1> where <столбец_условия> = <значение_условия> - обновить запись.
+<command> delete from <имя_таблицы> where <столбец> = <значение> - удалить запись.
+<command> info <имя_таблицы> - вывести информацию о таблице.
+<command> exit - выход из программы
+<command> help - справочная информация
+
+>>> Введите команду: create_table users name:str age:int is_active:bool
+Таблица "users" успешно создана со столбцами: ID:int, name:str, age:int, is_active:bool
+
+>>> Введите команду: create_table products title:str price:int in_stock:bool
+Таблица "products" успешно создана со столбцами: ID:int, title:str, price:int, in_stock:bool
+
+>>> Введите команду: insert into users values ("Sergei", 28, true)
+Функция insert выполнилась за 0.000 секунд.
+Запись с ID=1 успешно добавлена в таблицу "users".
+
+>>> Введите команду: insert into users values ("Anna", 25, false)
+Функция insert выполнилась за 0.000 секунд.
+Запись с ID=2 успешно добавлена в таблицу "users".
+
+>>> Введите команду: insert into products values ("Laptop", 999, true)
+Функция insert выполнилась за 0.000 секунд.
+Запись с ID=1 успешно добавлена в таблицу "products".
+
+>>> Введите команду: insert into products values ("Mouse", 25, false)
+Функция insert выполнилась за 0.000 секунд.
+Запись с ID=2 успешно добавлена в таблицу "products".
+
+>>> Введите команду: select from users
+Функция _select_impl выполнилась за 0.000 секунд.
++----+--------+-----+-----------+
+| ID |  name  | age | is_active |
++----+--------+-----+-----------+
+| 1  | Sergei |  28 |    True   |
+| 2  |  Anna  |  25 |   False   |
++----+--------+-----+-----------+
+
+>>> Введите команду: select from users where age = 28
+Функция _select_impl выполнилась за 0.000 секунд.
++----+--------+-----+-----------+
+| ID |  name  | age | is_active |
++----+--------+-----+-----------+
+| 1  | Sergei |  28 |    True   |
++----+--------+-----+-----------+
+
+>>> Введите команду: select from products where in_stock = true
+Функция _select_impl выполнилась за 0.000 секунд.
++----+--------+-------+----------+
+| ID | title  | price | in_stock |
++----+--------+-------+----------+
+| 1  | Laptop |  999  |   True   |
++----+--------+-------+----------+
+
+>>> Введите команду: update users set age = 29 where name = "Sergei"
+Обновлено 1 записей в таблице "users".
+
+>>> Введите команду: select from users
+Функция _select_impl выполнилась за 0.000 секунд.
++----+--------+-----+-----------+
+| ID |  name  | age | is_active |
++----+--------+-----+-----------+
+| 1  | Sergei |  29 |    True   |
+| 2  |  Anna  |  25 |   False   |
++----+--------+-----+-----------+
+
+>>> Введите команду: delete from users where is_active = false
+Вы уверены, что хотите выполнить "удаление записей"? [y/n]: y
+Ошибка валидации: 'utf-8' codec can't decode byte 0xd0 in position 0: invalid continuation byte
+Ошибка: 'utf-8' codec can't decode byte 0xd0 in position 0: invalid continuation byte
+
+>>> Введите команду: delete from users where is_active = false
+Вы уверены, что хотите выполнить "удаление записей"? [y/n]: y
+Удалено 1 записей из таблицы "users".
+
+>>> Введите команду: delete from products where title = "Nonexistent"
+Вы уверены, что хотите выполнить "удаление записей"? [y/n]: n
+Операция отменена.
+Удалено 0 записей из таблицы "products".
+
+>>> Введите команду: list_tables
+- users
+- products
+
+>>> Введите команду: info users
+Таблица: users
+Столбцы: ID:int, name:str, age:int, is_active:bool
+Количество записей: 1
+
+>>> Введите команду: info products
+Таблица: products
+Столбцы: ID:int, title:str, price:int, in_stock:bool
+Количество записей: 2
+
+>>> Введите команду: drop_table products
+Вы уверены, что хотите выполнить "удаление таблицы"? [y/n]: y
+Таблица "products" успешно удалена.
+
+>>> Введите команду: create_table products title:str price:int
+Таблица "products" успешно создана со столбцами: ID:int, title:str, price:int
+
+>>> Введите команду: insert into products values ("Keyboard", 49)
+Функция insert выполнилась за 0.000 секунд.
+Запись с ID=1 успешно добавлена в таблицу "products".
+
+>>> Введите команду: select from products
+Функция _select_impl выполнилась за 0.000 секунд.
++----+----------+-------+
+| ID |  title   | price |
++----+----------+-------+
+| 1  | Keyboard |   49  |
++----+----------+-------+
 
 >>> Введите команду: exit
 Выход из программы.
