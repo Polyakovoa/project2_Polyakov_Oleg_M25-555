@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+from .decorators import confirm_action, create_cacher, handle_db_errors, log_time
+
+# Создаем кэшер для запросов select
+select_cacher = create_cacher()
+
+
+@handle_db_errors
 def create_table(metadata: dict, table_name: str, columns: list) -> dict:
     """Создает новую таблицу в метаданных.
     
@@ -41,6 +48,8 @@ def create_table(metadata: dict, table_name: str, columns: list) -> dict:
     return metadata
 
 
+@handle_db_errors
+@confirm_action("удаление таблицы")
 def drop_table(metadata: dict, table_name: str) -> dict:
     """Удаляет таблицу из метаданных.
     
@@ -63,6 +72,8 @@ def drop_table(metadata: dict, table_name: str) -> dict:
     return metadata
 
 
+@handle_db_errors
+@log_time
 def insert(metadata: dict, table_name: str, values: list) -> tuple:
     """Добавляет новую запись в таблицу.
     
@@ -115,16 +126,10 @@ def insert(metadata: dict, table_name: str, values: list) -> tuple:
     return validated_values
 
 
-def select(table_data: list, where_clause: dict = None) -> list:
-    """Выбирает записи из данных таблицы.
-    
-    Args:
-        table_data: Данные таблицы
-        where_clause: Условие фильтрации {столбец: значение}
-        
-    Returns:
-        list: Отфильтрованные данные
-    """
+@handle_db_errors
+@log_time
+def _select_impl(table_data: list, where_clause: dict = None) -> list:
+    """Внутренняя реализация select без кэширования."""
     if where_clause is None:
         return table_data
     
@@ -138,7 +143,7 @@ def select(table_data: list, where_clause: dict = None) -> list:
             if isinstance(record_value, bool):
                 # Для bool преобразуем строки в булевы значения
                 if isinstance(value, str):
-                    if value.lower() in ('true', '1', 'yes', 'false', '0', 'no'):
+                    if value.lower() in ('true', '1', 'yes', 'false', '0', 'no'):  # noqa: E501
                         if value.lower() in ('true', '1', 'yes'):
                             compare_value = True
                         else:
@@ -152,7 +157,7 @@ def select(table_data: list, where_clause: dict = None) -> list:
                 compare_value = value
             
             # Сравниваем значения
-            if isinstance(record_value, bool) and isinstance(compare_value, bool):
+            if isinstance(record_value, bool) and isinstance(compare_value, bool):  # noqa: E501
                 if record_value != compare_value:
                     match = False
                     break
@@ -167,6 +172,26 @@ def select(table_data: list, where_clause: dict = None) -> list:
     return filtered_data
 
 
+def select(table_data: list, where_clause: dict = None) -> list:
+    """Выбирает записи из данных таблицы с кэшированием.
+    
+    Args:
+        table_data: Данные таблицы
+        where_clause: Условие фильтрации {столбец: значение}
+        
+    Returns:
+        list: Отфильтрованные данные
+    """
+    # Создаем ключ для кэша на основе данных и условия
+    cache_key = f"select_{id(table_data)}_{str(where_clause)}"
+    
+    def get_data():
+        return _select_impl(table_data, where_clause)
+    
+    return select_cacher(cache_key, get_data)
+
+
+@handle_db_errors
 def update(table_data: list, set_clause: dict, where_clause: dict) -> list:
     """Обновляет записи в данных таблицы.
     
@@ -211,6 +236,8 @@ def update(table_data: list, set_clause: dict, where_clause: dict) -> list:
     return updated_data
 
 
+@handle_db_errors
+@confirm_action("удаление записей")
 def delete(table_data: list, where_clause: dict) -> list:
     """Удаляет записи из данных таблицы.
     
@@ -235,7 +262,7 @@ def delete(table_data: list, where_clause: dict) -> list:
             if isinstance(record_value, bool):
                 # Для bool преобразуем строки в булевы значения
                 if isinstance(value, str):
-                    if value.lower() in ('true', '1', 'yes', 'false', '0', 'no'):
+                    if value.lower() in ('true', '1', 'yes', 'false', '0', 'no'):  # noqa: E501
                         if value.lower() in ('true', '1', 'yes'):
                             compare_value = True
                         else:
@@ -249,7 +276,7 @@ def delete(table_data: list, where_clause: dict) -> list:
                 compare_value = value
             
             # Сравниваем значения
-            if isinstance(record_value, bool) and isinstance(compare_value, bool):
+            if isinstance(record_value, bool) and isinstance(compare_value, bool):  # noqa: E501
                 if record_value != compare_value:
                     match = False
                     break

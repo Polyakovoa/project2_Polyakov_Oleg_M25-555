@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 import shlex
+
 from prettytable import PrettyTable
-from .utils import load_metadata, save_metadata, load_table_data, save_table_data
-from .core import create_table, drop_table, insert, select, update, delete
+
+from .core import create_table, delete, drop_table, insert, select, update
+from .utils import load_metadata, load_table_data, save_metadata, save_table_data
 
 
 def welcome():
