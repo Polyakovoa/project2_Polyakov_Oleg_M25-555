@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 from .decorators import confirm_action, create_cacher, handle_db_errors, log_time
 
 # Создаем кэшер для запросов select
@@ -51,7 +52,7 @@ def create_table(metadata: dict, table_name: str, columns: list) -> dict:
 @handle_db_errors
 @confirm_action("удаление таблицы")
 def drop_table(metadata: dict, table_name: str) -> dict:
-    """Удаляет таблицу из метаданных.
+    """Удаляет таблицу из метаданных и удаляет файл с данными.
     
     Args:
         metadata: Текущие метаданные базы данных
@@ -69,6 +70,13 @@ def drop_table(metadata: dict, table_name: str) -> dict:
     
     # Удаляем таблицу из метаданных
     del metadata[table_name]
+    
+    # Удаляем файл с данными таблицы
+    import os
+    data_file = f"data/{table_name}.json"
+    if os.path.exists(data_file):
+        os.remove(data_file)
+    
     return metadata
 
 

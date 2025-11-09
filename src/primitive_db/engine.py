@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 
 import shlex
-
 from prettytable import PrettyTable
-
-from .core import create_table, delete, drop_table, insert, select, update
-from .utils import load_metadata, load_table_data, save_metadata, save_table_data
+from .utils import load_metadata, save_metadata, load_table_data, save_table_data
+from .core import create_table, drop_table, insert, select, update, delete
+from .decorators import parse_where_condition, parse_set_clause
 
 
 def welcome():
-    """Функция приветствия"""
+    """Функция приветствия и игрового цикла"""
     print("Первая попытка запустить проект!\n")
     print("***")
     print("<command> exit - выйти из программы")
@@ -26,70 +25,6 @@ def welcome():
             print("<command> help - справочная информация")
         else:
             print(f"Неизвестная команда: {command}")
-
-
-def parse_where_condition(where_str: str) -> dict:
-    """Парсит условие WHERE в словарь.
-    
-    Args:
-        where_str: Строка условия вида "age = 28" или "name = 'John'"
-        
-    Returns:
-        dict: Словарь {столбец: значение}
-        
-    Raises:
-        ValueError: Если формат условия некорректен
-    """
-    if not where_str:
-        return {}
-    
-    # Разбиваем на части по оператору '='
-    parts = where_str.split('=', 1)
-    if len(parts) != 2:
-        raise ValueError('Некорректный формат условия WHERE. '
-                       'Используйте: столбец = значение')
-    
-    column = parts[0].strip()
-    value = parts[1].strip()
-    
-    # Убираем кавычки для строковых значений
-    if (value.startswith('"') and value.endswith('"')) or \
-       (value.startswith("'") and value.endswith("'")):
-        value = value[1:-1]
-    
-    return {column: value}
-
-
-def parse_set_clause(set_str: str) -> dict:
-    """Парсит условие SET в словарь.
-    
-    Args:
-        set_str: Строка условия вида "age = 29" или "name = 'John'"
-        
-    Returns:
-        dict: Словарь {столбец: новое_значение}
-        
-    Raises:
-        ValueError: Если формат условия некорректен
-    """
-    if not set_str:
-        return {}
-    
-    # Разбиваем на части по оператору '='
-    parts = set_str.split('=', 1)
-    if len(parts) != 2:
-        raise ValueError('Некорректный формат условия SET. '
-                       'Используйте: столбец = значение')
-    
-    column = parts[0].strip()
-    value = parts[1].strip()
-    
-    # Убираем кавычки для строковых значений
-    if (value.startswith('"') and value.endswith('"')) or \
-       (value.startswith("'") and value.endswith("'")):
-        value = value[1:-1]
-    
-    return {column: value}
 
 
 def display_table(data: list, columns: list) -> None:
@@ -130,7 +65,7 @@ def run():
     
     print("***Операции с данными***\n")
     print("Функции:")
-    print("<command> create_table <имя_таблицы> <столбец1:тип> <столбец2:тип> ... - создать таблицу")  # noqa: E501
+    print("<command> create_table <имя_таблицы> <столбец1:тип> <столбец2:тип> .. - создать таблицу")  # noqa: E501
     print("<command> list_tables - показать список всех таблиц")
     print("<command> drop_table <имя_таблицы> - удалить таблицу")
     print("<command> insert into <имя_таблицы> values (<значение1>, <значение2>, ...) - создать запись.")  # noqa: E501
@@ -161,7 +96,7 @@ def run():
             elif command == "help":
                 print("***Операции с данными***")
                 print("Функции:")
-                print("<command> create_table <имя_таблицы> <столбец1:тип> <столбец2:тип> ... - создать таблицу")  # noqa: E501
+                print("<command> create_table <имя_таблицы> <столбец1:тип> <столбец2:тип> .. - создать таблицу")  # noqa: E501
                 print("<command> list_tables - показать список всех таблиц")
                 print("<command> drop_table <имя_таблицы> - удалить таблицу")
                 print("<command> insert into <имя_таблицы> values (<значение1>, <значение2>, ...) - создать запись.")  # noqa: E501
@@ -183,13 +118,10 @@ def run():
                           'Имя таблицы не должно содержать двоеточие.')
                     continue
                 columns = args[2:]
-                try:
-                    metadata = create_table(metadata, table_name, columns)
-                    save_metadata(metadata_file, metadata)
-                    column_list = ", ".join(metadata[table_name])
-                    print(f'Таблица "{table_name}" успешно создана со столбцами: {column_list}')  # noqa: E501
-                except ValueError as e:
-                    print(f"Ошибка: {e}")
+                metadata = create_table(metadata, table_name, columns)
+                save_metadata(metadata_file, metadata)
+                column_list = ", ".join(metadata[table_name])
+                print(f'Таблица "{table_name}" успешно создана со столбцами: {column_list}')  # noqa: E501
                     
             elif command == "list_tables":
                 if not metadata:
@@ -229,31 +161,27 @@ def run():
                 # Загружаем данные таблицы
                 table_data = load_table_data(table_name)
                 
-                try:
-                    validated_values = insert(metadata, table_name, values)
-                    
-                    # Генерируем новый ID
-                    if table_data:
-                        max_id = max(record.get('ID', 0) for record in table_data)  # noqa: E501
-                        new_id = max_id + 1
-                    else:
-                        new_id = 1
-                    
-                    # Создаем новую запись
-                    columns = metadata[table_name]
-                    new_record = {'ID': new_id}
-                    
-                    # Добавляем остальные значения
-                    for i, column in enumerate(columns[1:]):  # Пропускаем ID
-                        col_name = column.split(':')[0]
-                        new_record[col_name] = validated_values[i]
-                    
-                    table_data.append(new_record)
-                    save_table_data(table_name, table_data)
-                    print(f'Запись с ID={new_id} успешно добавлена в таблицу "{table_name}".')  # noqa: E501
-                    
-                except ValueError as e:
-                    print(f"Ошибка: {e}")
+                validated_values = insert(metadata, table_name, values)
+                
+                # Генерируем новый ID
+                if table_data:
+                    max_id = max(record.get('ID', 0) for record in table_data)  # noqa: E501
+                    new_id = max_id + 1
+                else:
+                    new_id = 1
+                
+                # Создаем новую запись
+                columns = metadata[table_name]
+                new_record = {'ID': new_id}
+                
+                # Добавляем остальные значения
+                for i, column in enumerate(columns[1:]):  # Пропускаем ID
+                    col_name = column.split(':')[0]
+                    new_record[col_name] = validated_values[i]
+                
+                table_data.append(new_record)
+                save_table_data(table_name, table_data)
+                print(f'Запись с ID={new_id} успешно добавлена в таблицу "{table_name}".')  # noqa: E501
                     
             elif command == "select":
                 if len(args) < 3 or args[1].lower() != "from":
@@ -272,11 +200,7 @@ def run():
                 where_clause = {}
                 if len(args) > 4 and args[3].lower() == "where":
                     where_str = ' '.join(args[4:])
-                    try:
-                        where_clause = parse_where_condition(where_str)
-                    except ValueError as e:
-                        print(f"Ошибка: {e}")
-                        continue
+                    where_clause = parse_where_condition(where_str)
                 
                 # Выполняем выборку
                 result_data = select(table_data, where_clause)
@@ -304,21 +228,13 @@ def run():
                     i += 1
                 
                 set_str = ' '.join(set_parts)
-                try:
-                    set_clause = parse_set_clause(set_str)
-                except ValueError as e:
-                    print(f"Ошибка: {e}")
-                    continue
+                set_clause = parse_set_clause(set_str)
                 
                 # Парсим WHERE условие
                 where_clause = {}
                 if i < len(args) and args[i].lower() == "where":
                     where_str = ' '.join(args[i+1:])
-                    try:
-                        where_clause = parse_where_condition(where_str)
-                    except ValueError as e:
-                        print(f"Ошибка: {e}")
-                        continue
+                    where_clause = parse_where_condition(where_str)
                 
                 # Загружаем данные таблицы
                 table_data = load_table_data(table_name)
@@ -348,11 +264,7 @@ def run():
                 
                 # Парсим WHERE условие
                 where_str = ' '.join(args[4:])
-                try:
-                    where_clause = parse_where_condition(where_str)
-                except ValueError as e:
-                    print(f"Ошибка: {e}")
-                    continue
+                where_clause = parse_where_condition(where_str)
                 
                 # Загружаем данные таблицы
                 table_data = load_table_data(table_name)
@@ -389,7 +301,5 @@ def run():
             else:
                 print(f'Функции "{command}" нет. Попробуйте снова.')
                 
-        except ValueError as e:
-            print(f"Ошибка: {e}")
         except Exception as e:
-            print(f"Некорректное значение: {e}. Попробуйте снова.")
+            print(f"Ошибка: {e}")
