@@ -40,6 +40,7 @@ def create_table(metadata: dict, table_name: str, columns: list) -> dict:
     metadata[table_name] = table_columns
     return metadata
 
+
 def drop_table(metadata: dict, table_name: str) -> dict:
     """Удаляет таблицу из метаданных.
     
@@ -60,3 +61,170 @@ def drop_table(metadata: dict, table_name: str) -> dict:
     # Удаляем таблицу из метаданных
     del metadata[table_name]
     return metadata
+
+
+def insert(metadata: dict, table_name: str, values: list) -> tuple:
+    """Добавляет новую запись в таблицу.
+    
+    Args:
+        metadata: Метаданные базы данных
+        table_name: Имя таблицы
+        values: Список значений для вставки
+        
+    Returns:
+        tuple: (новый ID, обновленные данные таблицы)
+        
+    Raises:
+        ValueError: Если таблица не существует или неверные данные
+    """
+    if table_name not in metadata:
+        raise ValueError(f'Таблица "{table_name}" не существует.')
+    
+    # Получаем схему таблицы (без ID столбца для проверки количества)
+    table_columns = metadata[table_name][1:]  # Пропускаем ID:int
+    expected_count = len(table_columns)
+    
+    if len(values) != expected_count:
+        raise ValueError(f'Ожидается {expected_count} значений, '
+                       f'получено {len(values)}')
+    
+    # Валидируем типы данных
+    validated_values = []
+    for i, (column, value) in enumerate(zip(table_columns, values)):
+        col_name, col_type = column.split(':')
+        
+        try:
+            if col_type == 'int':
+                validated_value = int(value)
+            elif col_type == 'bool':
+                # Преобразуем строки в bool
+                if value.lower() in ('true', '1', 'yes'):
+                    validated_value = True
+                elif value.lower() in ('false', '0', 'no'):
+                    validated_value = False
+                else:
+                    raise ValueError(f'Некорректное булево значение: {value}')
+            else:  # str
+                # Убираем кавычки если они есть
+                validated_value = str(value).strip('"\'')
+            
+            validated_values.append(validated_value)
+        except (ValueError, TypeError) as e:
+            raise ValueError(f'Неверный тип для столбца {col_name}: {e}')
+    
+    return validated_values
+
+
+def select(table_data: list, where_clause: dict = None) -> list:
+    """Выбирает записи из данных таблицы.
+    
+    Args:
+        table_data: Данные таблицы
+        where_clause: Условие фильтрации {столбец: значение}
+        
+    Returns:
+        list: Отфильтрованные данные
+    """
+    if where_clause is None:
+        return table_data
+    
+    filtered_data = []
+    for record in table_data:
+        match = True
+        for column, value in where_clause.items():
+            # Преобразуем значение для сравнения
+            if isinstance(record.get(column), bool):
+                # Для bool преобразуем строки
+                if value.lower() in ('true', '1', 'yes'):
+                    compare_value = True
+                elif value.lower() in ('false', '0', 'no'):
+                    compare_value = False
+                else:
+                    match = False
+                    break
+            else:
+                compare_value = value
+            
+            if str(record.get(column)) != str(compare_value):
+                match = False
+                break
+        
+        if match:
+            filtered_data.append(record)
+    
+    return filtered_data
+
+
+def update(table_data: list, set_clause: dict, where_clause: dict) -> list:
+    """Обновляет записи в данных таблицы.
+    
+    Args:
+        table_data: Данные таблицы
+        set_clause: Поля для обновления {столбец: новое_значение}
+        where_clause: Условие фильтрации {столбец: значение}
+        
+    Returns:
+        list: Обновленные данные
+    """
+    updated_data = []
+    updated_count = 0
+    
+    for record in table_data:
+        match = True
+        for column, value in where_clause.items():
+            if str(record.get(column)) != str(value):
+                match = False
+                break
+        
+        if match:
+            # Обновляем запись
+            updated_record = record.copy()
+            for column, new_value in set_clause.items():
+                if column in updated_record:
+                    # Преобразуем тип если нужно
+                    if isinstance(updated_record[column], bool):
+                        if new_value.lower() in ('true', '1', 'yes'):
+                            updated_record[column] = True
+                        elif new_value.lower() in ('false', '0', 'no'):
+                            updated_record[column] = False
+                    elif isinstance(updated_record[column], int):
+                        updated_record[column] = int(new_value)
+                    else:
+                        updated_record[column] = str(new_value).strip('"\'')
+            updated_data.append(updated_record)
+            updated_count += 1
+        else:
+            updated_data.append(record)
+    
+    return updated_data
+
+
+def delete(table_data: list, where_clause: dict) -> list:
+    """Удаляет записи из данных таблицы.
+    
+    Args:
+        table_data: Данные таблицы
+        where_clause: Условие фильтрации {столбец: значение}
+        
+    Returns:
+        list: Данные после удаления
+    """
+    if where_clause is None:
+        return []
+    
+    filtered_data = []
+    deleted_count = 0
+    
+    for record in table_data:
+        match = True
+        for column, value in where_clause.items():
+            if str(record.get(column)) != str(value):
+                match = False
+                break
+        
+        if not match:
+            filtered_data.append(record)
+        else:
+            deleted_count += 1
+    
+    return filtered_data
