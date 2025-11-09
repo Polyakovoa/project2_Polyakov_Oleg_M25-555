@@ -132,22 +132,34 @@ def select(table_data: list, where_clause: dict = None) -> list:
     for record in table_data:
         match = True
         for column, value in where_clause.items():
+            record_value = record.get(column)
+            
             # Преобразуем значение для сравнения
-            if isinstance(record.get(column), bool):
-                # Для bool преобразуем строки
-                if value.lower() in ('true', '1', 'yes'):
-                    compare_value = True
-                elif value.lower() in ('false', '0', 'no'):
-                    compare_value = False
+            if isinstance(record_value, bool):
+                # Для bool преобразуем строки в булевы значения
+                if isinstance(value, str):
+                    if value.lower() in ('true', '1', 'yes', 'false', '0', 'no'):
+                        if value.lower() in ('true', '1', 'yes'):
+                            compare_value = True
+                        else:
+                            compare_value = False
+                    else:
+                        # Если это не булева строка, сравниваем как строки
+                        compare_value = value
                 else:
-                    match = False
-                    break
+                    compare_value = value
             else:
                 compare_value = value
             
-            if str(record.get(column)) != str(compare_value):
-                match = False
-                break
+            # Сравниваем значения
+            if isinstance(record_value, bool) and isinstance(compare_value, bool):
+                if record_value != compare_value:
+                    match = False
+                    break
+            else:
+                if str(record_value) != str(compare_value):
+                    match = False
+                    break
         
         if match:
             filtered_data.append(record)
@@ -221,20 +233,30 @@ def delete(table_data: list, where_clause: dict) -> list:
             
             # Преобразуем значение для сравнения
             if isinstance(record_value, bool):
-                # Для bool преобразуем строки
-                if value.lower() in ('true', '1', 'yes'):
-                    compare_value = True
-                elif value.lower() in ('false', '0', 'no'):
-                    compare_value = False
+                # Для bool преобразуем строки в булевы значения
+                if isinstance(value, str):
+                    if value.lower() in ('true', '1', 'yes', 'false', '0', 'no'):
+                        if value.lower() in ('true', '1', 'yes'):
+                            compare_value = True
+                        else:
+                            compare_value = False
+                    else:
+                        # Если это не булева строка, сравниваем как строки
+                        compare_value = value
                 else:
-                    match = False
-                    break
+                    compare_value = value
             else:
                 compare_value = value
             
-            if str(record_value) != str(compare_value):
-                match = False
-                break
+            # Сравниваем значения
+            if isinstance(record_value, bool) and isinstance(compare_value, bool):
+                if record_value != compare_value:
+                    match = False
+                    break
+            else:
+                if str(record_value) != str(compare_value):
+                    match = False
+                    break
         
         if not match:
             filtered_data.append(record)

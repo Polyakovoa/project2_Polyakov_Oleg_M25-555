@@ -128,6 +128,9 @@ def run():
     
     print("***Операции с данными***\n")
     print("Функции:")
+    print("<command> create_table <имя_таблицы> <столбец1:тип> <столбец2:тип> ... - создать таблицу")  # noqa: E501
+    print("<command> list_tables - показать список всех таблиц")
+    print("<command> drop_table <имя_таблицы> - удалить таблицу")
     print("<command> insert into <имя_таблицы> values (<значение1>, <значение2>, ...) - создать запись.")  # noqa: E501
     print("<command> select from <имя_таблицы> where <столбец> = <значение> - прочитать записи по условию.")  # noqa: E501
     print("<command> select from <имя_таблицы> - прочитать все записи.")
@@ -156,6 +159,9 @@ def run():
             elif command == "help":
                 print("***Операции с данными***")
                 print("Функции:")
+                print("<command> create_table <имя_таблицы> <столбец1:тип> <столбец2:тип> ... - создать таблицу")  # noqa: E501
+                print("<command> list_tables - показать список всех таблиц")
+                print("<command> drop_table <имя_таблицы> - удалить таблицу")
                 print("<command> insert into <имя_таблицы> values (<значение1>, <значение2>, ...) - создать запись.")  # noqa: E501
                 print("<command> select from <имя_таблицы> where <столбец> = <значение> - прочитать записи по условию.")  # noqa: E501
                 print("<command> select from <имя_таблицы> - прочитать все записи.")
