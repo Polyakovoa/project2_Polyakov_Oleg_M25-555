@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+
 from .decorators import confirm_action, create_cacher, handle_db_errors, log_time
 
 # Создаем кэшер для запросов select
@@ -72,7 +73,6 @@ def drop_table(metadata: dict, table_name: str) -> dict:
     del metadata[table_name]
     
     # Удаляем файл с данными таблицы
-    import os
     data_file = f"data/{table_name}.json"
     if os.path.exists(data_file):
         os.remove(data_file)

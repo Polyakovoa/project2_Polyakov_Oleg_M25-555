@@ -38,7 +38,7 @@ def confirm_action(action_name: str):
                 print("Операция отменена.")
                 # Возвращаем исходные данные вместо None
                 if len(args) > 0:
-                    return args[0]  # Возвращаем первый аргумент (обычно metadata или table_data)
+                    return args[0]  # Возвращаем первый аргумент (обычно metadata или table_data) # noqa: E501
                 return None
         return wrapper
     return decorator
