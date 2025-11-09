@@ -47,40 +47,104 @@ bool - логические значения
 
 ## Демонстрация работы:
 
-На сайте Asciinema: https://asciinema.org/a/4M5i8e6d30LfrY9P4fiaLK7zK
+Создание таблиц на сайте Asciinema: https://asciinema.org/a/4M5i8e6d30LfrY9P4fiaLK7zK
+
+Демо полного функционала: https://asciinema.org/a/r0GFZtVAuTqgTnq1c6SBg704m
 
 Демонстрация в текстовом формате:
 
-admin@Ubuntu:~/Рабочий стол/project2_Polyakov_Oleg_M25-555/project2_Polyakov_Oleg_M25-555$ project
-***База данных***
+admin@Ubuntu:~/project2_Polyakov_Oleg_M25-555$ project
+***Операции с данными***
 
 Функции:
-<command> create_table <имя_таблицы> <столбец1:тип> <столбец2:тип> .. - создать таблицу
+<command> create_table <имя_таблицы> <столбец1:тип> <столбец2:тип> ... - создать таблицу
 <command> list_tables - показать список всех таблиц
 <command> drop_table <имя_таблицы> - удалить таблицу
+<command> insert into <имя_таблицы> values (<значение1>, <значение2>, ...) - создать запись.
+<command> select from <имя_таблицы> where <столбец> = <значение> - прочитать записи по условию.
+<command> select from <имя_таблицы> - прочитать все записи.
+<command> update <имя_таблицы> set <столбец1> = <новое_значение1> where <столбец_условия> = <значение_условия> - обновить запись.
+<command> delete from <имя_таблицы> where <столбец> = <значение> - удалить запись.
+<command> info <имя_таблицы> - вывести информацию о таблице.
 <command> exit - выход из программы
 <command> help - справочная информация
 
->>>Введите команду: create_table users name:str age:int is_active:bool
+>>> Введите команду: create_table users name:str age:int is_active:bool
 Таблица "users" успешно создана со столбцами: ID:int, name:str, age:int, is_active:bool
 
->>>Введите команду: create_table products title:str price: int
-Ошибка: Некорректный тип данных: . Допустимые типы: int, str, bool
+>>> Введите команду: create_table products title:str price:int in_stock:bool
+Таблица "products" успешно создана со столбцами: ID:int, title:str, price:int, in_stock:bool
 
->>>Введите команду: create_table products title:str price:int
-Таблица "products" успешно создана со столбцами: ID:int, title:str, price:int
+>>> Введите команду: insert into users values ("Sergei", 28, true)
+Запись с ID=1 успешно добавлена в таблицу "users".
 
->>>Введите команду: list_tables
+>>> Введите команду: insert into users values ("Anna", 25, false)
+Запись с ID=2 успешно добавлена в таблицу "users".
+
+>>> Введите команду: insert into products values ("Laptop", 999, true)
+Запись с ID=1 успешно добавлена в таблицу "products".
+
+>>> Введите команду: insert into products values ("Mouse", 25, false)
+Запись с ID=2 успешно добавлена в таблицу "products".
+
+>>> Введите команду: select from users
++----+--------+-----+-----------+
+| ID |  name  | age | is_active |
++----+--------+-----+-----------+
+| 1  | Sergei |  28 |    True   |
+| 2  |  Anna  |  25 |   False   |
++----+--------+-----+-----------+
+
+>>> Введите команду: select from users where age = 28
++----+--------+-----+-----------+
+| ID |  name  | age | is_active |
++----+--------+-----+-----------+
+| 1  | Sergei |  28 |    True   |
++----+--------+-----+-----------+
+
+>>> Введите команду: select from products where in_stock = true
++----+--------+-------+----------+
+| ID | title  | price | in_stock |
++----+--------+-------+----------+
+| 1  | Laptop |  999  |   True   |
++----+--------+-------+----------+
+
+>>> Введите команду: update users set age = 29 where name = "Sergei"
+Обновлено 1 записей в таблице "users".
+
+>>> Введите команду: select from users
++----+--------+-----+-----------+
+| ID |  name  | age | is_active |
++----+--------+-----+-----------+
+| 1  | Sergei |  29 |    True   |
+| 2  |  Anna  |  25 |   False   |
++----+--------+-----+-----------+
+
+>>> Введите команду: delete from users where is_active = false
+Удалено 1 записей из таблицы "users".
+
+>>> Введите команду: select from users
++----+--------+-----+-----------+
+| ID |  name  | age | is_active |
++----+--------+-----+-----------+
+| 1  | Sergei |  29 |    True   |
++----+--------+-----+-----------+
+
+>>> Введите команду: list_tables
 - users
 - products
 
->>>Введите команду: drop_table products
-Таблица "products" успешно удалена.
+>>> Введите команду: info users
+Таблица: users
+Столбцы: ID:int, name:str, age:int, is_active:bool
+Количество записей: 1
 
->>>Введите команду: list_tables
-- users
+>>> Введите команду: info products
+Таблица: products
+Столбцы: ID:int, title:str, price:int, in_stock:bool
+Количество записей: 2
 
->>>Введите команду: exit
+>>> Введите команду: exit
 Выход из программы.
-admin@Ubuntu:~/Рабочий стол/project2_Polyakov_Oleg_M25-555/project2_Polyakov_Oleg_M25-555$
+admin@Ubuntu:~/project2_Polyakov_Oleg_M25-555$
 exit
