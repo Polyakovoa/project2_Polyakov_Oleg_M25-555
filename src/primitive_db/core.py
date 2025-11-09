@@ -213,18 +213,30 @@ def delete(table_data: list, where_clause: dict) -> list:
         return []
     
     filtered_data = []
-    deleted_count = 0
     
     for record in table_data:
         match = True
         for column, value in where_clause.items():
-            if str(record.get(column)) != str(value):
+            record_value = record.get(column)
+            
+            # Преобразуем значение для сравнения
+            if isinstance(record_value, bool):
+                # Для bool преобразуем строки
+                if value.lower() in ('true', '1', 'yes'):
+                    compare_value = True
+                elif value.lower() in ('false', '0', 'no'):
+                    compare_value = False
+                else:
+                    match = False
+                    break
+            else:
+                compare_value = value
+            
+            if str(record_value) != str(compare_value):
                 match = False
                 break
         
         if not match:
             filtered_data.append(record)
-        else:
-            deleted_count += 1
     
     return filtered_data
